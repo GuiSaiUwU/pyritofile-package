@@ -1,0 +1,5 @@
+_gui_notes/*
+.venv/*
+dist/*
+build/*
+pyritofile.egg-info/*

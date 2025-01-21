@@ -13,6 +13,15 @@ from . import stream
 from json import dump, dumps, JSONEncoder
 
 
+class CACHED_BIN_HASHES(dict):
+    def __getitem__(self, key):
+        if key in self.keys():
+            return super().__getitem__(key)
+        else:
+            super().__setitem__(key, bin_hash(key))
+            return super().__getitem__(key)
+
+
 class PRFEncoder(JSONEncoder):
     def default(self, obj):
         if hasattr(obj, '__json__'):

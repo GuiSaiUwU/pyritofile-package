@@ -1,6 +1,7 @@
 from io import BytesIO, StringIO
+from typing import Optional
 from .stream import BinStream
-from .structs import Vector
+from .structs import BoundingBox, Vector
 from enum import IntEnum
 
 class SOFlag(IntEnum):
@@ -12,13 +13,53 @@ class SOFlag(IntEnum):
 
 
 class SO:
+    """
+    Represents either a SCO or an SCB.
+
+    Fields:
+    --------
+        `Optionals for SCO`:
+            `pivot`: :class:`Vector` that represents the pivot of the SCO, because them does not store bones.
+        
+        `Optionals for SCB`:
+            `flags`: A :class:`SOFlag`.
+            `version`: A float.
+            `vertex_type`: A integer that represents the vertex type.\n
+            `bounding_box`: :class:`BoundingBox` that has a min and max vectors.\n
+            `colors`: A list of RGBA values, only created if the SCB vertex_type >= 1.\n
+
+        `Shared`:
+            `material`: A string that represents the material name from the SO.\n
+            `name`: A string that represents the name of the SO.\n
+            `indices`: A list of integers that contains the vertices indices.\n
+            `positions`: A list of vertices :class:`Vector`.\n
+            `central`: A :class:`Vector`.
+    
+    Methods:
+    -------
+        `read_sco()`: Used to read any supported SCO file, it fills the fields of the instance.\n
+        `read_scb()`: Used to read any supported SCB file, it fills the fields of the instance.\n
+        `stream_sco()`: Used to manually write / read SCO files.\n
+        `stream_scb()`: Used to manually write / read SCB files.\n
+        `__json__()`: Returns a dict of every fields. {field: value of the field}.\n
+    """
+
     __slots__ = (
         'signature', 'version', 'flags', 'name',
         'central', 'pivot', 'bounding_box', 'material', 'vertex_type',
         'indices', 'positions', 'uvs', 'colors'
     )
 
-    def __init__(self, signature=None, version=None, flags=None, name=None, central=None, pivot=None, bounding_box=None, material=None, vertex_type=None, indices=None, positions=None, uvs=None, colors=None):
+    def __init__(self,
+            signature: Optional[str] = None, version: Optional[float] = None,
+            flags: Optional[int] = None, name: Optional[str] = None,
+            central: Optional[Vector] = None, pivot: Optional[Vector] = None,
+            bounding_box: Optional[BoundingBox] = None, material: Optional[str] = None,
+            vertex_type: Optional[int] = None, indices: list[int] = [],
+            positions: list[Vector] = [], uvs: list[Vector] = [],
+            colors: list[list[int]] = []
+        ):
+        
         self.signature = signature
         self.version = version
         self.flags = flags
@@ -61,6 +102,23 @@ class SO:
         return BinStream(open(path, mode))
 
     def read_sco(self, path, raw=None):
+        """
+        Initialize the fields of :class:`SO`, using SCO.
+
+        Parameters
+        ------------
+        `path`: Optional[:class:`str`]
+            File path to read the SCO using an existing file that should work in `open(path)`.\n
+        
+        `raw`: Optional[:class:`bytes`]
+            None (`Default value`): Recommended if reading from an file in local memory.\n
+            bytes (`String encoded as ascii`): Reads SCO information from it.\n
+
+        Raises
+        --------
+        `WrongFileSignature.`\n
+        `InvalidMethodUsage.`\n
+        """
         with self.stream_sco(path, 'r', raw) as f:
             lines = f.readlines()
             lines = [line[:-1] for line in lines]
@@ -160,6 +218,24 @@ class SO:
             return f.getvalue() if raw else None
 
     def read_scb(self, path, raw=None):
+        """
+        Initialize the fields of :class:`SO`, using a SCB.
+
+        Parameters
+        ------------
+        `path`: Optional[:class:`str`]
+            File path to read the SCB using an existing file that should work in `open(path)`.\n
+        
+        `raw`: Optional[:class:`bytes`]
+            None (`Default value`): Recommended if reading from an file in local memory.
+            bytes: Reads SCB information from a bytes object.\n
+
+        Raises
+        --------
+        `WrongFileSignature.`\n
+        `UnsupportedFileVersion.`\n
+        `InvalidMethodUsage.`\n
+        """
         with self.stream_scb(path, 'rb', raw) as bs:
             self.signature, = bs.read_s(8)
             if self.signature != 'r3d2Mesh':

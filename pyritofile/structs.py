@@ -40,6 +40,7 @@ class Vector:
             vec1.z + (vec2.z - vec1.z) * weight
         )
 
+
 class Quaternion:
     __slots__ = ('x', 'y', 'z', 'w')
 
@@ -95,6 +96,7 @@ class Quaternion:
             s1 * quat1.z + s2 * quat2.z,
             s1 * quat1.w + s2 * quat2.w,
         )        
+
 
 class Matrix4:
     __slots__ = (
@@ -301,3 +303,30 @@ class Matrix4:
                 )
 
         return translate, rotate, scale
+
+
+class BoundingSphere:
+    __slots__ = ('point', 'radius')
+    
+    def __init__(self, point: Vector, radius: float):
+        self.point = point
+        self.radius = radius
+    
+    def __str__(self):
+        p = self.point
+        r = self.radius
+        return f'{p.x, p.y, p.z} {r}'
+
+
+
+class BoundingBox:
+    __slots__ = ('min_vec', 'max_vec')
+    
+    def __init__(self, min_vec: Vector, max_vec: Vector):
+        self.min_vec = min_vec
+        self.max_vec = max_vec
+        
+    def __str__(self):
+        min = self.min_vec
+        max = self.max_vec
+        return f'{min.x, min.y, min.z} {max.x, max.y, max.z}'

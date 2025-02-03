@@ -2,7 +2,6 @@ from loguru import logger
 from pyritofile import SKN, SKL, BIN
 from requests import get
 
-
 def test_bin():
     logger.info("Testing BIN")
     response = get("https://raw.communitydragon.org/latest/game/globals.cdtb.bin")
@@ -14,6 +13,18 @@ def test_bin():
     else:
         logger.error("BIN Test failed")
 
+def test_local_bin():
+    logger.info("Testing Local BIN")
+
+    bin_file = BIN()
+    bin_file.read(r'C:\Users\GuiSai\Desktop\skin0.bin')
+    with open(r"C:\Users\GuiSai\Desktop\skin0.bin", "rb") as f:
+        content = f.read()
+    
+    if (bin_file.write('', True) == content):
+        logger.info("Local BIN Test passed")
+    else:
+        logger.error("Local BIN Test failed")
 
 def test_skn():
     logger.info("Testing SKN")
@@ -47,4 +58,5 @@ def test_skl():
 if __name__ == '__main__':
     test_bin()
     test_skn()
+    test_local_bin()
     #test_skl()

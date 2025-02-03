@@ -163,10 +163,19 @@ class BINHelper:
         field.value_type = BINHelper.fix_type(bs.read_u8()[0])
         bs.pad(4)  # size
         count, = bs.read_u32()
-        field.data = {
-            BINHelper.read_value(bs, field.key_type): BINHelper.read_value(bs, field.value_type)
-            for i in range(count)
-        }
+
+        # Boring, old, threating map as key: value, so it was deleting stuff that was copy-pasted with same name
+        #field.data = {
+        #    BINHelper.read_value(bs, field.key_type): BINHelper.read_value(bs, field.value_type)
+        #    for i in range(count)
+        #}
+
+        # New, chad, list of key and value pairs
+        field.data = [
+            (BINHelper.read_value(bs, field.key_type), BINHelper.read_value(bs, field.value_type))
+            for _ in range(count)
+        ]
+
         return field
     
     read_field_dict = {
@@ -281,7 +290,7 @@ class BINHelper:
         return None, size
     
     @staticmethod
-    def write_map(bs, field):
+    def write_map(bs, field: 'BINField'):
         size = 0
         bs.write_u8(
             field.key_type.value,
@@ -294,7 +303,7 @@ class BINHelper:
 
         content_size = 4
         bs.write_u32(len(field.data))
-        for key, value in field.data.items():
+        for key, value in field.data:
             content_size += BINHelper.write_value(bs,
                                                     key, field.key_type, header_size=False)
             content_size += BINHelper.write_value(bs,
@@ -389,7 +398,7 @@ class BIN:
         self.version = version
         self.is_patch = is_patch
         self.links = links
-        self.entries = entries
+        self.entries: list[BINEntry] = entries
         self.patches = patches
 
     def __json__(self):

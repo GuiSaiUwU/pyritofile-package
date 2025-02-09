@@ -9,6 +9,7 @@ from .wpk import WPK
 from .tex import TEX, TEXFormat
 from .wad import WAD, WADChunk, WADCompressionType, name_to_hex as wad_hash, guess_extension
 from .ermmm import Elf, FNV1, FNV1a
+from .rst import RST
 from . import stream
 from json import dump, dumps, JSONEncoder
 

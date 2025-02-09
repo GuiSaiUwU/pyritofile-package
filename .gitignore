@@ -3,3 +3,5 @@ _gui_notes/*
 dist/*
 build/*
 pyritofile.egg-info/*
+*/__pycache__/*
+testing.py

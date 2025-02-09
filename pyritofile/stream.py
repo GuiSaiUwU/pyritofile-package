@@ -38,7 +38,9 @@ class BinStream:
 
     # read
 
-    def read_fmt(self, fmt, fmt_size):
+    def read_fmt(self, fmt, fmt_size = None):
+        if not fmt_size:
+            fmt_size = Struct(fmt).size
         return Struct(fmt).unpack(self.stream.read(fmt_size))
 
     def read(self, length):
@@ -76,6 +78,12 @@ class BinStream:
 
     def read_f64(self, count=1):
         return Struct(f'<{count}d').unpack(self.stream.read(count*8))
+
+    def read_ul(self, count=1): # For rst
+        return Struct(f'<{count}L').unpack(self.stream.read(count*4))
+
+    def read_ull(self, count=1): # For rst
+        return Struct(f'<{count}Q').unpack(self.stream.read(count*8))
 
     def read_vec2(self, count=1):
         floats = Struct(f'<{count*2}f').unpack(self.stream.read(count*8))
@@ -161,7 +169,13 @@ class BinStream:
 
     def write_f32(self, *values):
         self.stream.write(Struct(f'<{len(values)}f').pack(*values))
+    
+    def write_ul(self, *values): # For rst
+        self.stream.write(Struct(f'<{len(values)}L').pack(*values))
 
+    def write_ull(self, *values): # For rst
+        self.stream.write(Struct(f'<{len(values)}Q').pack(*values))
+    
     def write_vec2(self, *values):
         floats = [f for vec in values for f in vec]
         self.stream.write(Struct(f'<{len(floats)}f').pack(*floats))

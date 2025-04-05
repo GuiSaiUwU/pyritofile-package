@@ -3,7 +3,6 @@ from .stream import BinStream
 from .ermmm import FNV1a
 from enum import IntEnum
 
-
 def hash_to_hex(hash):
     return f'{hash:08x}'
 
@@ -65,7 +64,6 @@ class BINType(IntEnum):
         return self.name
 
 class BINHelper:
-    size_offsets = []
     legacy_read = False
 
     @staticmethod
@@ -249,7 +247,7 @@ class BINHelper:
         for value in field.data:
             content_size += BINHelper.write_value(bs,
                                                     value, field.value_type, header_size=False)
-        BINHelper.size_offsets.append((return_offset, content_size))
+        bs.size_offsets.append((return_offset, content_size))
 
         size += content_size
         return None, size
@@ -273,7 +271,7 @@ class BINHelper:
             for value in field.data:
                 content_size += BINHelper.write_field(
                     bs, value, header_size=True)
-            BINHelper.size_offsets.append((return_offset, content_size))
+            bs.size_offsets.append((return_offset, content_size))
 
             size += content_size
         return None, size
@@ -308,7 +306,7 @@ class BINHelper:
                                                     key, field.key_type, header_size=False)
             content_size += BINHelper.write_value(bs,
                                                     value, field.value_type, header_size=False)
-        BINHelper.size_offsets.append((return_offset, content_size))
+        bs.size_offsets.append((return_offset, content_size))
 
         size += content_size
         return None, size
@@ -491,7 +489,8 @@ class BIN:
             bs.write_u32(len(self.entries))
             for entry in self.entries:
                 bs.write_u32(name_or_hex_to_hash(entry.type))
-            BINHelper.size_offsets = []  # this help to write sizes
+            
+            bs.size_offsets = []  # this help to write sizes
             for entry in self.entries:
                 return_offset = bs.tell()
 
@@ -503,7 +502,7 @@ class BIN:
                 for field in entry.data:
                     entry_size += BINHelper.write_field(
                         bs, field, header_size=True)
-                BINHelper.size_offsets.append((return_offset, entry_size))
+                bs.size_offsets.append((return_offset, entry_size))
             # patches
             if self.is_patch:
                 bs.write_u32(len(self.patches))
@@ -518,10 +517,10 @@ class BIN:
                     bs.write_s_sized16(patch.path, encoding='utf-8')
                     patch_size += BINHelper.write_value(
                         bs, patch.type, header_size=False)
-                    BINHelper.size_offsets.append(
+                    bs.size_offsets.append(
                         (return_offset, patch_size))
             # jump around and write size
-            for offset, size in BINHelper.size_offsets:
+            for offset, size in bs.size_offsets:
                 bs.seek(offset)
                 bs.write_u32(size)
             return bs.raw() if raw else None

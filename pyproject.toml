@@ -4,13 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyritofile"
-version = "0.2.3"
+dynamic = ["version"]
 authors = [
     { name = "GuiSaiUwU", email = "contaguardian@gmail.com" }
 ]
 description = "Python package to deal with League of Legends files."
 readme = { file = "README.md", content-type = "text/markdown" }
-license = { text = "GPLv3+" }
 dependencies = [
     "xxhash >=3.5.0",
     "pyzstd >=0.16.2"
@@ -19,4 +18,10 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/GuiSaiUwU/pyritofile-package"
 
+[project.license]
+text = "GPLv3+"
+
 [tool.setuptools.packages.find]
+
+[tool.setuptools.dynamic]
+version = {attr = "pyritofile.__version__"}

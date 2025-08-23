@@ -565,9 +565,10 @@ class BIN:
                     hashtables, 'hashes.bintypes.txt', field.key_type)
                 field.value_type = hex_to_name(
                     hashtables, 'hashes.bintypes.txt', field.value_type)
-                field.data = {
-                    un_hash_value(key, field.key_type): un_hash_value(value, field.value_type) for key, value in field.data.items()
-                }
+                field.data = [
+                    # 0 = Key, 1 = Value; Maps are stored as [k, v] list uwu 
+                    [un_hash_value(x[0], field.key_type), un_hash_value(x[1], field.value_type)] for x in field.data
+                ]
             else:
                 field.data = un_hash_value(field.data, field.type)
 

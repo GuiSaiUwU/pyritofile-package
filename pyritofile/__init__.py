@@ -13,7 +13,7 @@ from .rst import RST
 from . import stream
 from json import dump, dumps, JSONEncoder
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 class CACHED_BIN_HASHES(dict):
     def __getitem__(self, key):
